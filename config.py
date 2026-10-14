@@ -22,3 +22,16 @@ OUTPUT_COLUMNS = [
     "matched_note_id",
     "reason",
 ]
+
+SHIPMENT_COLUMNS = [
+    "shipment_id",
+    "origin",
+    "destination",
+    "route_type",
+    "material",
+    "quantity_tonnes",
+    "distance_km",
+    "freight_cost_inr",
+    "shipment_date",
+    "transporter",
+]
