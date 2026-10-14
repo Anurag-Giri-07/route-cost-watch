@@ -11,6 +11,7 @@ SHIPMENT_RECORDS_PATH = DATA_DIR / "shipment_records.csv"
 CONTEXT_NOTES_PATH = DATA_DIR / "context_notes.csv"
 SAMPLE_OUTPUT_PATH = DATA_DIR / "sample_output_format_v2.csv"
 OUTPUT_PATH = OUTPUT_DIR / "output.csv"
+EVAL_LABELS_PATH = PROJECT_ROOT / "eval_labels.csv"
 
 TRAILING_HISTORY_WEEKS = 8
 OWN_HISTORY_PERCENT_THRESHOLD = 10
