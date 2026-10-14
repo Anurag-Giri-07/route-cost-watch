@@ -12,6 +12,15 @@ CONTEXT_NOTES_PATH = DATA_DIR / "context_notes.csv"
 SAMPLE_OUTPUT_PATH = DATA_DIR / "sample_output_format_v2.csv"
 OUTPUT_PATH = OUTPUT_DIR / "output.csv"
 
+TRAILING_HISTORY_WEEKS = 8
+OWN_HISTORY_PERCENT_THRESHOLD = 10
+SIMILAR_ROUTES_PERCENT_THRESHOLD = 20
+OPEN_ENDED_NOTE_WEEKS = 1
+RETRIEVAL_TOP_K = 3
+EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
+VECTOR_STORE_DIR = PROJECT_ROOT / "vector_store"
+NOTES_STRUCTURED_PATH = PROJECT_ROOT / "notes_structured.json"
+
 OUTPUT_COLUMNS = [
     "route",
     "week_of",
