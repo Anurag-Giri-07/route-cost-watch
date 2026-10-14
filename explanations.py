@@ -75,13 +75,15 @@ def generate_reason(
     row: Mapping[str, object],
     verdict: Verdict,
     matched_note: Mapping[str, str] | None,
-    llm: LLMWrapper,
+    llm: LLMWrapper | None,
 ) -> str:
     """Generate a validated explanation without allowing the LLM to choose verdicts."""
     if verdict.matched_note_id is None:
         return UNEXPLAINED_REASON
     if matched_note is None or matched_note["note_id"] != verdict.matched_note_id:
         raise ValueError("a justified verdict requires its exact matched note")
+    if llm is None:
+        raise ValueError("a justified verdict requires an LLM wrapper")
 
     reason = llm.complete(
         "justified_explanation", build_justified_prompt(row, matched_note)
