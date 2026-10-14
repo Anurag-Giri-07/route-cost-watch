@@ -2,3 +2,5 @@ pytest
 pandas
 numpy
 sentence-transformers
+openai
+python-dotenv

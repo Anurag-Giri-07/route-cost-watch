@@ -9,3 +9,4 @@ __pycache__/
 .pytest_cache/
 .vector_store/
 vector_store/
+llm_cache/

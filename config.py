@@ -20,6 +20,13 @@ RETRIEVAL_TOP_K = 3
 EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 VECTOR_STORE_DIR = PROJECT_ROOT / "vector_store"
 NOTES_STRUCTURED_PATH = PROJECT_ROOT / "notes_structured.json"
+LLM_CACHE_DIR = PROJECT_ROOT / "llm_cache"
+LLM_USAGE_LOG_PATH = OUTPUT_DIR / "llm_usage.csv"
+LLM_BASE_URL = "https://api.groq.com/openai/v1"
+LLM_API_KEY_ENV_VAR = "GROQ_API_KEY"
+LLM_DEFAULT_MODEL = "llama-3.3-70b-versatile"
+LLM_TEMPERATURE = 0
+LLM_MAX_OUTPUT_TOKENS = 600
 
 OUTPUT_COLUMNS = [
     "route",
