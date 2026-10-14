@@ -1,0 +1,7 @@
+data/
+docs/
+outputs/
+.env
+.venv/
+__pycache__/
+.pytest_cache/
