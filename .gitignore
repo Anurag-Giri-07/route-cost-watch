@@ -2,6 +2,10 @@ data/
 docs/
 outputs/
 .env
+.env.*
+!.env.example
 .venv/
 __pycache__/
 .pytest_cache/
+.vector_store/
+vector_store/
