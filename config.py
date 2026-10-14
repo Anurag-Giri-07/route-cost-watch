@@ -25,9 +25,14 @@ LLM_CACHE_DIR = PROJECT_ROOT / "llm_cache"
 LLM_USAGE_LOG_PATH = OUTPUT_DIR / "llm_usage.csv"
 LLM_BASE_URL = "https://api.groq.com/openai/v1"
 LLM_API_KEY_ENV_VAR = "GROQ_API_KEY"
-LLM_DEFAULT_MODEL = "llama-3.3-70b-versatile"
+LLM_DEFAULT_MODEL = "openai/gpt-oss-120b"
 LLM_TEMPERATURE = 0
 LLM_MAX_OUTPUT_TOKENS = 600
+PUBLISHED_MODEL_PRICES_PER_MILLION = {
+    "openai/gpt-oss-120b": {"input": 0.15, "output": 0.60},
+}
+REPRO_CHECK_PATH = PROJECT_ROOT / "repro_check.md"
+P9_TOKEN_COST_LOG_PATH = OUTPUT_DIR / "p9_token_cost_log.csv"
 
 OUTPUT_COLUMNS = [
     "route",

@@ -124,14 +124,22 @@ class LLMWrapper:
             )
 
 
-def create_default_wrapper() -> LLMWrapper:
+def create_default_wrapper(
+    cache_dir: Path = LLM_CACHE_DIR,
+    usage_log_path: Path = LLM_USAGE_LOG_PATH,
+) -> LLMWrapper:
     """Create the configured API client without exposing the secret in code."""
     load_dotenv()
     api_key = os.getenv(LLM_API_KEY_ENV_VAR)
     if not api_key:
         raise RuntimeError(f"{LLM_API_KEY_ENV_VAR} is required for LLM explanations")
     model = os.getenv("LLM_MODEL", LLM_DEFAULT_MODEL)
-    return LLMWrapper(OpenAICompatibleClient(api_key, LLM_BASE_URL), model)
+    return LLMWrapper(
+        OpenAICompatibleClient(api_key, LLM_BASE_URL),
+        model,
+        cache_dir,
+        usage_log_path,
+    )
 
 
 def list_configured_model_ids() -> list[str]:
