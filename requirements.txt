@@ -1,6 +1,7 @@
-pytest
-pandas
-numpy
-sentence-transformers
-openai
-python-dotenv
+pytest==9.1.1
+pandas==3.0.6
+numpy==2.5.4
+sentence-transformers==6.1.0
+openai==3.31.0
+python-dotenv==1.2.4
+
