@@ -1,6 +1,7 @@
 data/
 docs/
 outputs/
+.github/
 .env
 .env.*
 !.env.example

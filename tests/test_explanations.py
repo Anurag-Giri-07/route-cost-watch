@@ -5,6 +5,7 @@ from explanations import (
     build_justified_prompt,
     generate_reason,
     is_valid_justified_reason,
+    normalize_reason,
 )
 from llm_wrapper import LLMResponse, LLMWrapper
 from verdicts import Verdict
@@ -87,6 +88,12 @@ def test_validator_accepts_unicode_hyphens_in_matched_note_dates() -> None:
     reason = "Verdict: justified. Note N002 covers 2025‑01‑20 to 2025‑01‑26."
 
     assert is_valid_justified_reason(reason, note)
+
+
+def test_normalize_reason_is_ascii() -> None:
+    text = "N002\u202f(2025\u201101\u201120)\u00a0on\u200bthe \u2019x\u2019"
+
+    assert normalize_reason(text) == "N002 (2025-01-20) on the 'x'"
 
 
 def test_wrapper_caches_and_logs_each_request(tmp_path) -> None:

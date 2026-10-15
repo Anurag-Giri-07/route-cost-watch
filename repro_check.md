@@ -5,6 +5,6 @@
 - Model: `openai/gpt-oss-120b`
 - Uncached LLM calls in run 1: 3
 - Input tokens: 836
-- Output tokens: 823
-- Published-rate estimate: $0.000619
+- Output tokens: 916
+- Published-rate estimate: $0.000675
 - Actual cost: $0.00 (Groq free tier).

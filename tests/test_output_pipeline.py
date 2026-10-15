@@ -1,8 +1,18 @@
 import pandas as pd
+import pytest
 
 from check_format import validate_output
+from llm_wrapper import LLMResponse, LLMWrapper
 from output_pipeline import build_output_rows, format_output_row, write_output
 from verdicts import Verdict
+
+
+class FakeClient:
+    def __init__(self, response_text: str) -> None:
+        self.response_text = response_text
+
+    def complete(self, model: str, prompt: str) -> LLMResponse:
+        return LLMResponse(self.response_text, input_tokens=12, output_tokens=8)
 
 
 def sample_metric() -> dict[str, object]:
@@ -86,6 +96,104 @@ def test_build_output_rows_passes_formatted_values_to_explanations(monkeypatch) 
 
     assert output_rows[0]["reason"].startswith("Verdict: justified.")
     assert received_rows[0]["vs_own_history"] == "+29.5% vs this route's past average"
+
+
+def test_build_output_rows_reasons_are_ascii_only(monkeypatch, tmp_path) -> None:
+    candidate = {
+        **sample_metric(),
+        "route_type": "Medium",
+        "is_candidate": True,
+    }
+    monkeypatch.setattr("output_pipeline.load_weekly_metrics", lambda: object())
+    monkeypatch.setattr("output_pipeline.calculate_baselines", lambda _: object())
+    monkeypatch.setattr(
+        "output_pipeline.flag_candidates",
+        lambda _: pd.DataFrame([candidate]),
+    )
+    monkeypatch.setattr(
+        "output_pipeline.load_structured_notes",
+        lambda: [sample_note()],
+    )
+    monkeypatch.setattr(
+        "output_pipeline.determine_verdict",
+        lambda *_: Verdict("No (justified)", "N002"),
+    )
+
+    client = FakeClient(
+        "Verdict: justified. Note N002 covers 2025\u201101\u201120 "
+        "to 2025\u201101\u201126.\u202fIt\u2019s valid."
+    )
+    llm = LLMWrapper(
+        client,
+        "test-model",
+        tmp_path / "cache",
+        tmp_path / "usage.csv",
+    )
+
+    output_rows = build_output_rows(llm=llm)
+
+    assert output_rows
+    assert all(row["reason"].isascii() for row in output_rows)
+
+
+@pytest.mark.parametrize("failure_mode", ["missing_key", "failed_call"])
+def test_explanation_failure_preserves_decided_output(
+    failure_mode, monkeypatch, tmp_path, capsys
+) -> None:
+    candidate = {
+        **sample_metric(),
+        "route_type": "Medium",
+        "is_candidate": True,
+    }
+    monkeypatch.setattr("output_pipeline.load_weekly_metrics", lambda: object())
+    monkeypatch.setattr("output_pipeline.calculate_baselines", lambda _: object())
+    monkeypatch.setattr(
+        "output_pipeline.flag_candidates",
+        lambda _: pd.DataFrame([candidate]),
+    )
+    monkeypatch.setattr(
+        "output_pipeline.load_structured_notes",
+        lambda: [sample_note()],
+    )
+    monkeypatch.setattr(
+        "output_pipeline.determine_verdict",
+        lambda *_: Verdict("No (justified)", "N002"),
+    )
+
+    if failure_mode == "missing_key":
+        monkeypatch.delenv("GROQ_API_KEY", raising=False)
+        monkeypatch.setattr("llm_wrapper.load_dotenv", lambda: None)
+        llm = None
+    else:
+        class FailingClient:
+            def complete(self, model: str, prompt: str) -> LLMResponse:
+                raise RuntimeError("service unavailable")
+
+        llm = LLMWrapper(
+            FailingClient(),
+            "test-model",
+            tmp_path / "cache",
+            tmp_path / "usage.csv",
+        )
+
+    output_rows = build_output_rows(llm=llm)
+
+    assert len(output_rows) == 1
+    row = output_rows[0]
+    assert {
+        "flagged": row["flagged"],
+        "matched_note_id": row["matched_note_id"],
+        "cost_per_tonne_km": row["cost_per_tonne_km"],
+        "vs_own_history": row["vs_own_history"],
+        "vs_similar_routes": row["vs_similar_routes"],
+    } == {
+        "flagged": "No (justified)",
+        "matched_note_id": "N002",
+        "cost_per_tonne_km": "3.29",
+        "vs_own_history": "+29.5% vs this route's past average",
+        "vs_similar_routes": "+22.4% vs similar-length routes this week",
+    }
+    assert "Warning:" in capsys.readouterr().out
 
 
 def sample_note() -> dict[str, str]:

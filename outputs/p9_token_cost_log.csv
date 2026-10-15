@@ -1,0 +1,2 @@
+model,uncached_llm_calls,input_tokens,output_tokens,published_rate_estimate_usd,actual_cost
+openai/gpt-oss-120b,3,836,916,0.000675,0.00 (Groq free tier)

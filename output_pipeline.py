@@ -59,7 +59,11 @@ def build_output_rows(llm: LLMWrapper | None = None) -> list[dict[str, str]]:
         verdict = determine_verdict(metric["route"], metric["week_of"])
         note = notes_by_id.get(verdict.matched_note_id)
         if verdict.matched_note_id and llm is None:
-            llm = create_default_wrapper()
+            try:
+                llm = create_default_wrapper()
+            except RuntimeError as error:
+                if "GROQ_API_KEY is required" not in str(error):
+                    raise
         output_row = format_output_row(metric, verdict, reason="")
         output_row["reason"] = generate_reason(output_row, verdict, note, llm)
         output_rows.append(output_row)

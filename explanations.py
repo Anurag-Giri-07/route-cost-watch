@@ -14,7 +14,7 @@ UNEXPLAINED_REASON = (
     "unexplained and worth a human review."
 )
 NOTE_ID_PATTERN = re.compile(r"\bN\d{3}\b")
-DATE_SEPARATOR_TRANSLATION = str.maketrans(
+REASON_TRANSLATION = str.maketrans(
     {
         "\u2010": "-",
         "\u2011": "-",
@@ -22,8 +22,20 @@ DATE_SEPARATOR_TRANSLATION = str.maketrans(
         "\u2013": "-",
         "\u2014": "-",
         "\u2212": "-",
+        "\u00a0": " ",
+        "\u202f": " ",
+        "\u2009": " ",
+        "\u200b": " ",
+        "\u2018": "'",
+        "\u2019": "'",
+        "\u201c": '"',
+        "\u201d": '"',
     }
 )
+
+
+def normalize_reason(text: str) -> str:
+    return " ".join(text.translate(REASON_TRANSLATION).split())
 
 
 def _value(row: Mapping[str, object], field: str) -> str:
@@ -61,7 +73,7 @@ def fixed_justified_reason(note: Mapping[str, str]) -> str:
 
 def is_valid_justified_reason(reason: str, note: Mapping[str, str]) -> bool:
     """Require the selected note ID and dates, with no unrelated note IDs."""
-    normalized_reason = reason.translate(DATE_SEPARATOR_TRANSLATION)
+    normalized_reason = normalize_reason(reason)
     cited_note_ids = set(NOTE_ID_PATTERN.findall(reason))
     return (
         note["note_id"] in cited_note_ids
@@ -83,11 +95,24 @@ def generate_reason(
     if matched_note is None or matched_note["note_id"] != verdict.matched_note_id:
         raise ValueError("a justified verdict requires its exact matched note")
     if llm is None:
-        raise ValueError("a justified verdict requires an LLM wrapper")
+        print(
+            "Warning: no Groq LLM wrapper is available (check GROQ_API_KEY); "
+            "using a deterministic explanation."
+        )
+        return fixed_justified_reason(matched_note)
 
-    reason = llm.complete(
-        "justified_explanation", build_justified_prompt(row, matched_note)
-    )
+    try:
+        reason = normalize_reason(
+            llm.complete(
+                "justified_explanation", build_justified_prompt(row, matched_note)
+            )
+        )
+    except Exception as error:
+        print(
+            "Warning: Groq explanation call failed "
+            f"({type(error).__name__}); using a deterministic explanation."
+        )
+        return fixed_justified_reason(matched_note)
     if is_valid_justified_reason(reason, matched_note):
         return reason
     return fixed_justified_reason(matched_note)
